@@ -1,0 +1,144 @@
+﻿@page "/addProducts"
+@using BlazorAppVisualStudio.Models
+@using BlazorAppVisualStudio.Services.Interfaces
+
+@inject IProductServices _productServices
+@inject ICategoryServices _categoryServices
+@inject NavigationManager _navigationManager
+
+<PageTitle>Add - Product</PageTitle>
+
+<ModuleTitle Title="Add Products"></ModuleTitle>
+
+<button
+    class="btn btn-dark"
+    @onclick="@(() => _navigationManager.NavigateTo("/products"))"
+>Go back products</button>
+
+<EditForm 
+    Model="@product"
+    OnSubmit="@Save"
+>
+
+    <div class="row">
+       
+        @* TITULO *@
+        <div class="col-8 form-group">
+            <label
+                class="col-form-label"
+                for="title"
+            >Title</label>
+
+            <InputText 
+                id="title"
+                class="form-control"
+                required
+                @bind-Value="product.Title"
+            />
+        </div>
+
+        @* PRECIO *@
+        <div class="col form-group">
+            <label 
+                class="col-form-label"
+                for="price"
+            >Price</label>
+
+            <InputNumber
+                id="price"
+                class="form-control"
+                required
+                @bind-Value="product.Price" />
+        </div>
+
+    </div>
+
+    <div class="row">
+
+        @* CATEGORIAS *@
+        <div class="col form-group">
+            <label
+                class="col-form-label"
+                for="category"
+            >Category</label>
+
+            <InputSelect
+                id="category"
+                required
+                class="form-control"
+                @bind-Value="product.CategoryId"
+            >
+                <option>Select category...</option>
+                @foreach(var category in categories)
+                {
+                
+                    <option value="@category.Id">@category.Name</option>
+                
+                }
+            </InputSelect>
+        </div>
+
+        @* IMAGENES *@
+        <div class="col form-group">
+            <label 
+                for="image" 
+                class="col-form-label">Image (Url)
+            </label>
+
+            <InputText 
+                id="image" 
+                @bind-Value="product.Image" 
+                required 
+                class="form-control" />
+        </div>
+
+    </div>
+
+    <div class="row">
+
+        @* DESCRIPCION *@
+        <div class="col form-group">
+            <label 
+                for="descripcion"
+                class="col-form-label"
+            >Descripción</label>
+
+            <InputTextArea 
+                id="descripcion"
+                required
+                class="form-control"
+                @bind-Value="product.Description"
+            ></InputTextArea>
+        </div>
+
+    </div>
+
+    <hr />
+
+    <button
+        class="btn btn-primary"
+        type="submit"
+    >Save</button>
+
+</EditForm>
+
+
+@code {
+
+    private Product product = new();
+
+    private List<Category> categories = new List<Category>();
+
+    protected override async Task OnInitializedAsync()
+    {
+        categories = await _categoryServices.Get();
+    }
+
+    private async Task Save()
+    {
+        product.Images = new string[1] { product.Image };
+        await _productServices.Add(product);
+        _navigationManager.NavigateTo("/products");
+    }
+
+}
